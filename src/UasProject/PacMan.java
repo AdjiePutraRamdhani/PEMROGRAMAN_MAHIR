@@ -17,7 +17,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private int boardWidth = columnCount * tileSize;
     private int boardHeight = rowCount * tileSize;
 
-    private Image backgroundImage, wallImage, cherryImage, titleScreenImage;
+    private Image backgroundImage, wallImage, cherryImage, titleScreenImage, coinImage;
     private Image blueGhostImage, greenGhostImage, pinkGhostImage, yellowGhostImage;
     private Image playerUpImage, playerDownImage, playerLeftImage, playerRightImage, playerDiamImage;
 
@@ -35,7 +35,8 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private int gameState = 0;
     private int titleState = 0;
     private int playState = 1;
-    private boolean pausedState = false;
+    private int pauseState = 2;
+    private boolean pausedGame = false;
     private boolean gameOver = false;
     private boolean gameComplete = false;
 
@@ -109,7 +110,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             Clip clip = AudioSystem.getClip();
             clip.open(inputStream);
             clip.start();
-            clip.loop(0);
+            clip.loop(10);
         } catch (UnsupportedAudioFileException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -147,6 +148,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         this.backgroundImage = new ImageIcon(this.getClass().getResource("background.png")).getImage();
         this.cherryImage = new ImageIcon(this.getClass().getResource("cherry.png")).getImage();
         this.titleScreenImage = new ImageIcon(this.getClass().getResource("titleScreen.png")).getImage();
+        this.coinImage = new ImageIcon(this.getClass().getResource("coin.png")).getImage();
 
         this.blueGhostImage = new ImageIcon(this.getClass().getResource("blueGhost.png")).getImage();
         this.yellowGhostImage = new ImageIcon(this.getClass().getResource("yellowGhost.png")).getImage();
@@ -282,7 +284,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                         pacman = new Block(playerRightImage, x, y, tileSize, tileSize);
                         break;
                     case ' ':
-                        foods.add(new Block(null, x + 14, y + 14, 4, 4));
+                        foods.add(new Block(coinImage, (int) (x + 8), (int) ( y + 8), 15, 15));
                         break;
                 }
             }
@@ -292,7 +294,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private void loadNextLevel() {
         //System.out.println("Loading next level: " + level);
         level++;
-        if (level > 3) {
+        if (level > 1) {
             gameComplete = true;
             //System.out.println("Game over. No more levels.");
             return;
@@ -314,7 +316,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             drawObjects(g);
         }
 
-        if (pausedState) {
+        if (pausedGame) {
             drawObjects(g);
             drawPausedScreen(g);
         }
@@ -544,7 +546,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         move();
         repaint();
 
-        if (pausedState) {
+        if (pausedGame) {
             gameLoop.stop();
         }
         if (gameOver) {
@@ -591,6 +593,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             }
         }
 
+        /*if (pausedGame) {
+            if (e.getKeyCode() == KeyEvent.VK_P)
+                pausedGame = false;
+        }*/
         if (gameState == playState) {
             if (e.getKeyCode() == KeyEvent.VK_UP) {
                 pacman.updateDirection('U');
@@ -605,7 +611,9 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 pacman.updateDirection('R');
             }
             else if (e.getKeyCode() == KeyEvent.VK_P) {
-                pausedState = true;
+                pausedGame = true;
+                //gameState++;
+                //gameState++;
             }
 
 
@@ -618,6 +626,14 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             } else if (this.pacman.direction == 'R') {
                 this.pacman.image = this.playerRightImage;
             }
+
+            /*if (pausedGame) {
+                if (e.getKeyCode() == KeyEvent.VK_P) {
+                    loadMap(level);
+                    pausedGame = false;
+                    gameLoop.start();
+                }
+            }*/
 
             if (gameOver) {
                 loadMap(1);
